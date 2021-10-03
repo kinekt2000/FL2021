@@ -1,0 +1,293 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{tikz}
+\usepackage{wrapfig}
+\usepackage{multicol}
+\usepackage{color}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english,russian]{babel}
+
+\usetikzlibrary{automata, positioning, arrows}
+%-------------------------------------------
+
+\setlength{\textwidth}{7.0in}
+\setlength{\oddsidemargin}{-0.35in}
+\setlength{\topmargin}{-0.5in}
+\setlength{\textheight}{9.0in}
+\setlength{\parindent}{0.3in}
+
+\newtheorem{task}{Задача}
+
+\begin{document}
+
+\tikzset{
+  ->,
+  >=stealth',
+  node distance=3cm,
+  every state/.style={thick, fill=gray!10},
+  initial text=$ $,
+}
+
+\begin{flushright}
+\textbf{
+  ЛЭТИ, гр. 8303, Гришин Константин \\
+  \today
+}
+\end{flushright}
+
+\begin{center}
+\textbf{Формальные языки} \\
+\textbf{HW02}             \\
+\end{center}
+
+\noindent\textit{Решение 1.1}
+$\{\omega \in \{0, 1, \dots, 9\}^* \mid \omega \text{ делится нацело на } 5 \}$ \\
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[state, initial, accepting](g){g};
+    \node[state, right of=g](b){b};
+    \draw (g) edge[loop above]       node{0, 5}     (g)
+          (g) edge[bend left, above] node{not 0, 5} (b)
+          (b) edge[loop right]       node{not 0, 5} (b)
+          (b) edge[bend left, below] node{0, 5}     (g);
+  \end{tikzpicture}
+\end{figure} \\
+Тривиальный случай, минимизация невозможна.
+\qed
+\vspace{1em}
+
+\noindent\textit{Решение 1.2}
+Язык положительных чисел с плавающей точкой.
+Целая часть может отсутствовать, дробная часть может отсутствовать,
+но не одновременно. Перед точкой может не быть ничего.
+Лидирующих нулей быть не должно
+\begin{itemize}
+  \item $123.45, .45, 123$ -- числа
+  \item $\varepsilon, ., abc, 123., 1.2.3.4, 007$ -- не числа
+\end{itemize}
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[state] (start)                  [initial]   {s};
+    \node[state] (dot)   [right of=start]             {$\cdot$};
+    \node[state] (float) [right of=dot]   [accepting] {f};
+    \node[state] (int)   [above of=dot]   [accepting] {i};
+    \node[state] (sink)  [below of=dot]               {$\perp$};
+    \draw (start) edge[above]      node               {\{$\cdot$\}}         (dot)
+          (start) edge[above]      node[xshift=-1.5em]{\{1,...,9\}}         (int)
+          (start) edge[below]      node[xshift=-1em]  {\{0\}}               (sink)
+          (int)   edge[loop left]  node               {\{0,...,9\}}         (int)
+          (int)   edge[left]       node               {\{$\cdot$\}}         (dot)
+          (dot)   edge[left]       node               {\{$\cdot$\}}         (sink)
+          (dot)   edge[above]      node               {\{0,...,9\}}         (float)
+          (float) edge[loop right] node               {\{0,...,9\}}         (float)
+          (float) edge[right]      node[xshift=1em]   {\{$\cdot$\}}         (sink)
+          (sink)  edge[loop left]  node               {\{0,...,9,$\cdot$\}} (sink);
+  \end{tikzpicture}
+\end{figure}
+Рассмотрим следующие пары неэквивалентых состояний:
+\[\{
+  \langle s,     i \rangle,
+  \langle \cdot, i \rangle,
+  \langle \perp, i \rangle,
+  \langle s,     f \rangle,
+  \langle \cdot, f \rangle,
+  \langle \perp, f \rangle
+\}\]
+Пары
+$\{
+  \langle \perp, i \rangle,
+  \langle \perp, f \rangle
+\}$
+позволяют найти новые неэквивалентные состояния:
+\[\{
+  \langle \perp, s     \rangle,
+  \langle \perp, \cdot \rangle,
+  \langle \cdot, s     \rangle,
+  \langle i,     f     \rangle
+\}\]
+Рассмотренны все возможные классы эквивалентности,
+экивалентных вершин не оказалось. Следовательно, автомат является минимальным.
+\qed
+
+\clearpage
+\noindent\textit{Решение 1.3}
+$\{\omega \in \{a, b\}^* \mid |\omega|_a \leq 3, |\omega|_b > 2\}$ \\
+\begin{figure}[ht]
+  \centering
+  \begin{tikzpicture}
+    \node[state] (start)                  [initial]   {S};
+    \node[state] (01)    [right of=start]             {01};
+    \node[state] (02)    [right of=01]                {02};
+    \node[state] (0a)    [right of=02]    [accepting] {0a};
+
+    \node[state] (10)    [below of=start]             {10};
+    \node[state] (11)    [below of=01]                {11};
+    \node[state] (12)    [below of=02]                {12};
+    \node[state] (1a)    [below of=0a]    [accepting] {1a};
+
+    \node[state] (20)    [below of=10]                {20};
+    \node[state] (21)    [below of=11]                {21};
+    \node[state] (22)    [below of=12]                {22};
+    \node[state] (2a)    [below of=1a]    [accepting] {2a};
+
+    \node[state] (30)    [below of=20]                {30};
+    \node[state] (31)    [below of=21]                {31};
+    \node[state] (32)    [below of=22]                {32};
+    \node[state] (3a)    [below of=2a]    [accepting] {3a};
+
+    \node[state] (sink)  at (4.5, -12)                {X};
+
+    \draw (start) edge[left]       node {a} (10)
+          (start) edge[above]      node {b} (01)
+          
+          (01)    edge[left]       node {a} (11)
+          (01)    edge[above]      node {b} (02)
+
+          (02)    edge[left]       node {a} (12)
+          (02)    edge[above]      node {b} (0a)
+
+          (0a)    edge[left]       node {a} (1a)
+          (0a)    edge[loop right] node {b} (0a)
+
+          (10)    edge[left]       node {a} (20)
+          (10)    edge[above]      node {b} (11)
+          
+          (11)    edge[left]       node {a} (21)
+          (11)    edge[above]      node {b} (12)
+
+          (12)    edge[left]       node {a} (22)
+          (12)    edge[above]      node {b} (1a)
+
+          (1a)    edge[left]       node {a} (2a)
+          (1a)    edge[loop right] node {b} (1a)
+
+          (20)    edge[left]       node {a} (30)
+          (20)    edge[above]      node {b} (21)
+          
+          (21)    edge[left]       node {a} (31)
+          (21)    edge[above]      node {b} (22)
+
+          (22)    edge[left]       node {a} (32)
+          (22)    edge[above]      node {b} (2a)
+
+          (2a)    edge[left]       node {a} (3a)
+          (2a)    edge[loop right] node {b} (2a)
+
+          (30)    edge[below]       node {a} (sink)
+          (30)    edge[above]      node {b} (31)
+          
+          (31)    edge[left]       node {a} (sink)
+          (31)    edge[above]      node {b} (32)
+
+          (32)    edge[right]      node {a} (sink)
+          (32)    edge[above]      node {b} (3a)
+
+          (3a)    edge[below]       node {a} (sink)
+          (3a)    edge[loop right] node {b} (3a)
+          
+          (sink)  edge[loop below] node {a, b} (sink);    
+  \end{tikzpicture}
+\end{figure} \\
+Автомат состоит из $17$ вершин. Возможных пар $(17^2 - 17) / 2 = 136$.
+Конечных состояний $4$, пар вершин, которые различимы $\varepsilon$,
+$(17-4) * 4 = 52$. Следовательно для оставшихся $(136 - 52) = 84$ пар
+должны быть нетривиальные последовательности символов, которые их различают:
+
+\setlength{\columnseprule}{1pt}
+\def\columnseprulecolor{\color{black}}
+
+\begin{multicols}{5}
+\noindent\small
+(22, 11): "b" \\
+(22, 20): "b" \\
+(22, 12): "aab" \\
+(22, 31): "b" \\
+(22, 32): "ab" \\
+(22, 30): "b" \\
+(22, X):  "b" \\
+(22, S):  "b" \\
+(22, 01): "b" \\
+(22, 10): "b" \\
+(22, 21): "b" \\
+(22, 02): "aab" \\
+(20, 11): "bb" \\
+(12, 11): "b" \\
+(31, 11): "abb" \\
+(11, 32): "b" \\
+(11, 30): "bb" \\
+(11, X):  "bb" \\
+(11, S):  "bb" \\
+(11, 01): "aaabb" \\
+(11, 10): "bb" \\
+(11, 21): "aabb" \\
+(11, 02): "b" \\
+(20, 12): "b" \\
+(20, 31): "bb" \\
+(20, 32): "b" \\
+(20, 30): "abbb" \\
+(20, X):  "bbb" \\
+(20, S):  "aabbb" \\
+(20, 01): "bb" \\
+(20, 10): "aabbb" \\
+(20, 21): "bb" \\
+(20, 02): "b" \\
+(31, 12): "b" \\
+(12, 32): "ab" \\
+(12, 30): "b" \\
+(12, X):  "b" \\
+(12, S):  "b" \\
+(12, 01): "b" \\
+(12, 10): "b" \\
+(12, 21): "b" \\
+(12, 02): "aaab" \\
+(31, 32): "b" \\
+(31, 30): "bb" \\
+(31, X):  "bb" \\
+(31, S):  "bb" \\
+(31, 01): "abb" \\
+(31, 10): "bb" \\
+(31, 21): "abb" \\
+(31, 02): "b" \\
+(32, 30): "b" \\
+(32, X):  "b" \\
+(S, 32):  "b" \\
+(32, 01): "b" \\
+(32, 10): "b" \\
+(21, 32): "b" \\
+(32, 02): "ab" \\
+(X, 30):  "bbb" \\
+(S, 30):  "abbb" \\
+(01, 30): "bb" \\
+(30, 10): "abbb" \\
+(21, 30): "bb" \\
+(30, 02): "b" \\
+(S, X):   "bbb" \\
+(X, 01):  "bb" \\
+(X, 10):  "bbb" \\
+(21, X):  "bb" \\
+(X, 02):  "b" \\
+(1a, 2a): "aa" \\
+(1a, 3a): "a" \\
+(1a, 0a): "aaa" \\
+(3a, 2a): "a" \\
+(0a, 2a): "aa" \\
+(S, 01):  "bb" \\
+(S, 10):  "aaabbb" \\
+(21, S):  "bb" \\
+(S, 02):  "b" \\
+(01, 10): "bb" \\
+(21, 01): "aabb" \\
+(01, 02): "b" \\
+(21, 10): "bb" \\
+(02, 10): "b" \\
+(3a, 0a): "a" \\
+(21, 02): "b"
+\end{multicols}
+\qed
+\end{document}
