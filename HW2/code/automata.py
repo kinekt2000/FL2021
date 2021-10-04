@@ -60,12 +60,22 @@ class find_equivalence_classes:
                         pairs_queue.put(new_pair)
                         equivalence_table[new_pair] = [symbol] + equivalence_table[current_pair]
 
+        # find not marked pairs
         find_equivalence_classes.distinguishing_lines = dict(map(
             lambda item: (tuple(item[0]), item[1]),
             dict(filter(lambda item: item[1] is not None, equivalence_table.items())).items()
         )) 
 
-        return list(map(
-            lambda x: tuple(x),
-            list(dict(filter(lambda item: item[1] is None, equivalence_table.items())).keys())
-        ))
+        # convert equivalence pairs into equivalence classes
+        equivalence_pairs = list(dict(filter(lambda item: item[1] is None, equivalence_table.items())).keys())
+        equivalence_classes = []
+        for pair in equivalence_pairs:
+            add_pair_as_class = True
+            for index, cls in enumerate(equivalence_classes):
+                if cls.intersection(pair):
+                    equivalence_classes[index] = cls | pair
+                    add_pair_as_class = False
+            if (add_pair_as_class):
+                equivalence_classes.append(pair)
+
+        return list(map(lambda cls: tuple(cls), equivalence_classes))
