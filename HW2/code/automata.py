@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Callable, Hashable
+from typing import Callable, Dict, Hashable
 
 from queue import Queue
 from itertools import product
@@ -14,12 +14,10 @@ class Automata:
 
 
 class find_equivalence_classes:
-    def __init__(self):
+    distinguishing_lines: dict[Hashable, list]
+
+    def __new__(self, automata: Automata):
         self.distinguishing_lines = {}
-
-
-    def __call__(self, automata: Automata):
-        # create backward transitions table
         back_transitions_table = {}
         for state in automata.states:
             whence_by_symbols = {}
@@ -62,7 +60,7 @@ class find_equivalence_classes:
                         pairs_queue.put(new_pair)
                         equivalence_table[new_pair] = [symbol] + equivalence_table[current_pair]
 
-        self.distinguishing_lines = dict(map(
+        find_equivalence_classes.distinguishing_lines = dict(map(
             lambda item: (tuple(item[0]), item[1]),
             dict(filter(lambda item: item[1] is not None, equivalence_table.items())).items()
         )) 

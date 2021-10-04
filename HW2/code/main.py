@@ -73,9 +73,8 @@ minimized = Automata(
 
 
 if __name__ == "__main__":
-    fec = find_equivalence_classes()
-    print(fec(minimized))
-    for pair, line in fec.distinguishing_lines.items():
+    print(find_equivalence_classes(minimized))
+    for pair, line in find_equivalence_classes.distinguishing_lines.items():
         if(line):
             print(f"({pair[0]}, {pair[1]}): \"{''.join(line)}\"")
 
